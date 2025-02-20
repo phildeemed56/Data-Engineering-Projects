@@ -88,6 +88,13 @@ JOIN Cities c ON wd.CityID = c.CityID
 
 JOIN WeatherConditions wc ON wd.CityID = wc.CityID;
 
+
+***Power BI Visualizations***
+
+Interactive dashboards created in Power BI provide insights into real-time weather data, allowing for intuitive exploration of temperature, humidity, wind speed, and weather conditions across different cities.
+
+The Power BI visualizations are designed to give stakeholders an interactive experience, enabling them to filter and analyze weather trends with ease.
+
 ***Future Enhancements***
 
 Add support for more weather parameters.
