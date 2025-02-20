@@ -49,6 +49,7 @@ Execute the SQL script (weather_db_schema.sql) to create the necessary tables in
 Set your API key as an environment variable:
 
 For macOS/Linux: 
+
 export user_api='your_api_key_here'
 
 For Windows:
