@@ -1,13 +1,21 @@
-Weather Data Pipeline
-Overview
+**Weather Data Pipeline**
+
+***Overview***
+
 This project automates the retrieval and storage of real-time weather data from the OpenWeatherMap API into a Microsoft SQL Server database. It collects temperature, humidity, wind conditions, rainfall, and general weather descriptions for multiple cities and stores them in structured tables for further analysis.
 
 Features
+
 Fetches real-time weather data for multiple cities
+
 Stores data in an SQL Server database
+
 Records temperature, humidity, wind conditions, and weather descriptions
+
 Supports Windows Authentication for database access
+
 Uses Python (requests, pyodbc, and os modules) to interact with API and database
+
 Technologies Used
 Python: Data retrieval and database interaction
 OpenWeatherMap API: Real-time weather data source
