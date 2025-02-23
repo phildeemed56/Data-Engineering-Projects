@@ -1,19 +1,388 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{C9674DCB-5085-4A16-B785-4C70DD1589BD}") = "Demonstration Purpose", "Demonstration Purpose\Demonstration Purpose.dtproj", "{E5A24F28-3450-4A1C-AD5A-FA51E6FE2276}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Development|Default = Development|Default
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E5A24F28-3450-4A1C-AD5A-FA51E6FE2276}.Development|Default.ActiveCfg = Development
-		{E5A24F28-3450-4A1C-AD5A-FA51E6FE2276}.Development|Default.Build.0 = Development
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+#region Help:  Introduction to the script task
+/* The Script Task allows you to perform virtually any operation that can be accomplished in
+ * a .Net application within the context of an Integration Services control flow. 
+ * 
+ * Expand the other regions which have "Help" prefixes for examples of specific ways to use
+ * Integration Services features within this script task. */
+#endregion
+
+
+#region Namespaces
+using System;
+using System.Data;
+using Microsoft.SqlServer.Dts.Runtime;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+using System.IO;
+using System.Net;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+#endregion
+
+namespace ST_027504bfb72d4f1c9e654ccde57ab6ec
+{
+    public class Name
+    {
+        [JsonProperty("title")]  // Maps JSON "title" field to Title property 
+        public string Title { get; set; }
+
+        [JsonProperty("first")]  // Maps JSON "first" field to First property 
+        public string First { get; set; }
+
+        [JsonProperty("last")]  // Maps JSON "last" field to Last property 
+        public string Last { get; set; }
+    }
+
+    // Represents street details (Part of the Location class)
+    public class Street
+    {
+        [JsonProperty("number")]  // Street number 
+        public int Number { get; set; }
+
+        [JsonProperty("name")]  // Street name 
+        public string Name { get; set; }
+    }
+
+    // Represents geographic coordinates (latitude & longitude)
+    public class Coordinates
+    {
+        [JsonProperty("latitude")]  // Latitude value
+        public string Latitude { get; set; }
+
+        [JsonProperty("longitude")]  // Longitude value
+        public string Longitude { get; set; }
+    }
+
+    // Represents timezone details (Offset and Description)
+    public class Timezone
+    {
+        [JsonProperty("offset")]  // Timezone offset 
+        public string Offset { get; set; }
+
+        [JsonProperty("description")]  // Timezone description 
+        public string Description { get; set; }
+    }
+
+    // Represents the full location details of a user
+    public class Location
+    {
+        [JsonProperty("street")]  // Nested object: Street details
+        public Street Street { get; set; }
+
+        [JsonProperty("city")]  // City name
+        public string City { get; set; }
+
+        [JsonProperty("state")]  // State or region name
+        public string State { get; set; }
+
+        [JsonProperty("country")]  // Country name
+        public string Country { get; set; }
+
+        [JsonProperty("postcode")]  // Postal/Zip code
+        public string Postcode { get; set; }
+
+        [JsonProperty("coordinates")]  // Nested object: Geographic coordinates
+        public Coordinates Coordinates { get; set; }
+
+        [JsonProperty("timezone")]  // Nested object: Timezone details
+        public Timezone Timezone { get; set; }
+    }
+
+    // Represents user authentication details
+    public class Login
+    {
+        [JsonProperty("uuid")]  // Unique user ID
+        public string Uuid { get; set; }
+
+        [JsonProperty("username")]  // User's chosen username
+        public string Username { get; set; }
+
+        [JsonProperty("password")]  // Encrypted password
+        public string Password { get; set; }
+
+        [JsonProperty("salt")]  // Additional security salt for hashing
+        public string Salt { get; set; }
+
+        [JsonProperty("md5")]  // MD5 hashed password
+        public string Md5 { get; set; }
+
+        [JsonProperty("sha1")]  // SHA1 hashed password
+        public string Sha1 { get; set; }
+
+        [JsonProperty("sha256")]  // SHA256 hashed password
+        public string Sha256 { get; set; }
+    }
+
+    // Represents user's date of birth information
+    public class Dob
+    {
+        [JsonProperty("date")]  // Date of birth 
+        public DateTime Date { get; set; }
+
+        [JsonProperty("age")]  // Age in years
+        public int Age { get; set; }
+    }
+
+    // Represents user registration details 
+    public class Registered
+    {
+        [JsonProperty("date")]  // Date of registration
+        public DateTime Date { get; set; }
+
+        [JsonProperty("age")]  // Years since registration
+        public int Age { get; set; }
+    }
+
+    // Represents user identification details (SSN, passport number)
+    public class Id
+    {
+        [JsonProperty("name")]  // ID type 
+        public string Name { get; set; }
+
+        [JsonProperty("value")]  // ID value 
+        public string Value { get; set; }
+    }
+
+    // Represents user's profile picture URLs (Different sizes)
+    public class Picture
+    {
+        [JsonProperty("large")]  // URL for large-size profile picture
+        public string Large { get; set; }
+
+        [JsonProperty("medium")]  // URL for medium-size profile picture
+        public string Medium { get; set; }
+
+        [JsonProperty("thumbnail")]  // URL for thumbnail-size profile picture
+        public string Thumbnail { get; set; }
+    }
+
+    // Represents the complete user profile (combines all classes)
+    public class User
+    {
+        [JsonProperty("gender")]  // User's gender 
+        public string Gender { get; set; }
+
+        [JsonProperty("name")]  // Nested object: User's name details
+        public Name Name { get; set; }
+
+        [JsonProperty("location")]  // Nested object: User's location details
+        public Location Location { get; set; }
+
+        [JsonProperty("email")]  // User's email address
+        public string Email { get; set; }
+
+        [JsonProperty("login")]  // Nested object: User's login details
+        public Login Login { get; set; }
+
+        [JsonProperty("dob")]  // Nested object: Date of birth details
+        public Dob Dob { get; set; }
+
+        [JsonProperty("registered")]  // Nested object: Registration details
+        public Registered Registered { get; set; }
+
+        [JsonProperty("phone")]  // User's landline phone number
+        public string Phone { get; set; }
+
+        [JsonProperty("cell")]  // User's mobile phone number
+        public string Cell { get; set; }
+
+        [JsonProperty("id")]  // Nested object: Identification details
+        public Id Id { get; set; }
+
+        [JsonProperty("picture")]  // Nested object: Profile picture URLs
+        public Picture Picture { get; set; }
+
+        [JsonProperty("nat")]  // User's nationality 
+        public string Nat { get; set; }
+    }
+
+    // Represents the entire API response containing multiple users
+    public class ApiResponse
+    {
+        [JsonProperty("results")]  // A list of users retrieved from the API
+        public List<User> Results { get; set; }
+    }
+    /// <summary>
+    /// ScriptMain is the entry point class of the script.  Do not change the name, attributes,
+    /// or parent of this class.
+    /// </summary>
+	[Microsoft.SqlServer.Dts.Tasks.ScriptTask.SSISScriptTaskEntryPointAttribute]
+	public partial class ScriptMain : Microsoft.SqlServer.Dts.Tasks.ScriptTask.VSTARTScriptObjectModelBase
+	{
+        #region Help:  Using Integration Services variables and parameters in a script
+        /* To use a variable in this script, first ensure that the variable has been added to 
+         * either the list contained in the ReadOnlyVariables property or the list contained in 
+         * the ReadWriteVariables property of this script task, according to whether or not your
+         * code needs to write to the variable.  To add the variable, save this script, close this instance of
+         * Visual Studio, and update the ReadOnlyVariables and 
+         * ReadWriteVariables properties in the Script Transformation Editor window.
+         * To use a parameter in this script, follow the same steps. Parameters are always read-only.
+         * 
+         * Example of reading from a variable:
+         *  DateTime startTime = (DateTime) Dts.Variables["System::StartTime"].Value;
+         * 
+         * Example of writing to a variable:
+         *  Dts.Variables["User::myStringVariable"].Value = "new value";
+         * 
+         * Example of reading from a package parameter:
+         *  int batchId = (int) Dts.Variables["$Package::batchId"].Value;
+         *  
+         * Example of reading from a project parameter:
+         *  int batchId = (int) Dts.Variables["$Project::batchId"].Value;
+         * 
+         * Example of reading from a sensitive project parameter:
+         *  int batchId = (int) Dts.Variables["$Project::batchId"].GetSensitiveValue();
+         * */
+
+        #endregion
+
+        #region Help:  Firing Integration Services events from a script
+        /* This script task can fire events for logging purposes.
+         * 
+         * Example of firing an error event:
+         *  Dts.Events.FireError(18, "Process Values", "Bad value", "", 0);
+         * 
+         * Example of firing an information event:
+         *  Dts.Events.FireInformation(3, "Process Values", "Processing has started", "", 0, ref fireAgain)
+         * 
+         * Example of firing a warning event:
+         *  Dts.Events.FireWarning(14, "Process Values", "No values received for input", "", 0);
+         * */
+        #endregion
+
+        #region Help:  Using Integration Services connection managers in a script
+        /* Some types of connection managers can be used in this script task.  See the topic 
+         * "Working with Connection Managers Programatically" for details.
+         * 
+         * Example of using an ADO.Net connection manager:
+         *  object rawConnection = Dts.Connections["Sales DB"].AcquireConnection(Dts.Transaction);
+         *  SqlConnection myADONETConnection = (SqlConnection)rawConnection;
+         *  //Use the connection in some code here, then release the connection
+         *  Dts.Connections["Sales DB"].ReleaseConnection(rawConnection);
+         *
+         * Example of using a File connection manager
+         *  object rawConnection = Dts.Connections["Prices.zip"].AcquireConnection(Dts.Transaction);
+         *  string filePath = (string)rawConnection;
+         *  //Use the connection in some code here, then release the connection
+         *  Dts.Connections["Prices.zip"].ReleaseConnection(rawConnection);
+         * */
+        #endregion
+
+
+		/// <summary>
+        /// This method is called when this script task executes in the control flow.
+        /// Before returning from this method, set the value of Dts.TaskResult to indicate success or failure.
+        /// To open Help, press F1.
+        /// </summary>
+		public void Main()
+		{
+            // Generate a timestamp for logging purposes (Format: YYYYMMDDHHMMSS)
+            string currentdatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            // Define the directory where log files will be stored
+            string LogFolder = @"C:\Users\philm\OneDrive\Documents\XYZ\API C# Try Catch";
+
+            try
+            {
+                // Ensures the application expects a 100-continue response before sending large data, optimizing HTTP requests.
+                ServicePointManager.Expect100Continue = true;
+
+                // Configures the application to use TLS 1.2 for secure communication with external services.
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+
+                // Declare a string to store the JSON response from the API
+                string json = "";
+
+                // Use the WebClient class to make an HTTP GET request to the API
+                using (WebClient wc = new WebClient())
+                {
+                    // Download the JSON string from the API, requesting 100 random users
+                    json = wc.DownloadString("https://randomuser.me/api/?results=100");
+                }
+
+                // Deserialize the raw JSON string into an ApiResponse object
+                ApiResponse root = JsonConvert.DeserializeObject<ApiResponse>(json);
+
+                // Define the database connection string to connect to SQL Server
+                string connectionString = @"Data Source=Philip; Initial Catalog=RandomUserDB; Integrated Security=True;";
+
+                // Loop through each user in the deserialized results (from the API)
+                foreach (User user in root.Results)
+                {
+                    // Establish a new SQL connection using the connection string
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        // Open the connection to the SQL Server database
+                        connection.Open();
+
+                        // Create the insert statement (using parameterized query to avoid SQL injection)
+                        string insertStatement = @"INSERT INTO RandomUsers 
+                    (Gender, FirstName, LastName, Email, Username, Phone, Cell, StreetNumber, StreetName, City, 
+                     State, Country, Postcode, Latitude, Longitude, TimezoneOffset, TimezoneDescription, 
+                     PictureLarge, Nationality)
+                    VALUES 
+                    (@Gender, @FirstName, @LastName, @Email, @Username, @Phone, @Cell, @StreetNumber, 
+                     @StreetName, @City, @State, @Country, @Postcode, @Latitude, @Longitude, @TimezoneOffset, 
+                     @TimezoneDescription, @PictureLarge, @Nationality)";
+
+                        // Create the SqlCommand object with the insert statement and the SqlConnection object
+                        SqlCommand command = new SqlCommand(insertStatement, connection);
+
+                        // Add parameters to the SqlCommand to prevent SQL injection
+                        command.Parameters.AddWithValue("@Gender", user.Gender);
+                        command.Parameters.AddWithValue("@FirstName", user.Name.First);
+                        command.Parameters.AddWithValue("@LastName", user.Name.Last);
+                        command.Parameters.AddWithValue("@Email", user.Email);
+                        command.Parameters.AddWithValue("@Username", user.Login.Username);
+                        command.Parameters.AddWithValue("@Phone", user.Phone);
+                        command.Parameters.AddWithValue("@Cell", user.Cell);
+                        command.Parameters.AddWithValue("@StreetNumber", user.Location.Street.Number);
+                        command.Parameters.AddWithValue("@StreetName", user.Location.Street.Name);
+                        command.Parameters.AddWithValue("@City", user.Location.City);
+                        command.Parameters.AddWithValue("@State", user.Location.State);
+                        command.Parameters.AddWithValue("@Country", user.Location.Country);
+                        command.Parameters.AddWithValue("@Postcode", user.Location.Postcode);
+                        command.Parameters.AddWithValue("@Latitude", user.Location.Coordinates.Latitude);
+                        command.Parameters.AddWithValue("@Longitude", user.Location.Coordinates.Longitude);
+                        command.Parameters.AddWithValue("@TimezoneOffset", user.Location.Timezone.Offset);
+                        command.Parameters.AddWithValue("@TimezoneDescription", user.Location.Timezone.Description);
+                        command.Parameters.AddWithValue("@PictureLarge", user.Picture.Large);
+                        command.Parameters.AddWithValue("@Nationality", user.Nat);
+
+                        // Execute the insert statement
+                        int rowsAffected = command.ExecuteNonQuery();
+                        Console.WriteLine($"Rows affected: {rowsAffected}");
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                // Log the exception details into a log file
+                using (StreamWriter sw = File.CreateText(LogFolder + "\\" + "ErrorLog_" + currentdatetime + ".log"))
+                {
+                    // Write the full exception details (including stack trace) to the log file
+                    sw.WriteLine(exception.ToString());
+                }
+            }
+
+
+            Dts.TaskResult = (int)ScriptResults.Success;
+		}
+
+        #region ScriptResults declaration
+        /// <summary>
+        /// This enum provides a convenient shorthand within the scope of this class for setting the
+        /// result of the script.
+        /// 
+        /// This code was generated automatically.
+        /// </summary>
+        enum ScriptResults
+        {
+            Success = Microsoft.SqlServer.Dts.Runtime.DTSExecResult.Success,
+            Failure = Microsoft.SqlServer.Dts.Runtime.DTSExecResult.Failure
+        };
+        #endregion
+
+	}
+}
