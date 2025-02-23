@@ -1,22 +1,297 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomUser", "RandomUser\RandomUser.csproj", "{A49014C7-F8C0-410A-BC14-4B366741E4A0}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A49014C7-F8C0-410A-BC14-4B366741E4A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A49014C7-F8C0-410A-BC14-4B366741E4A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A49014C7-F8C0-410A-BC14-4B366741E4A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A49014C7-F8C0-410A-BC14-4B366741E4A0}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+using System; // Fundamental building block
+
+using System.Data; // Enables working with databases, tables, and datasets
+
+using System.Collections.Generic; // Enables working with lists and collections
+
+using System.Data.SqlClient; // Provides classes for connecting to SQL Server databases.
+
+using System.IO; // Allows reading from and writing to files.
+
+using System.Net; // Enables HTTP requests to fetch data from APIs.
+
+using Newtonsoft.Json; // Allows parsing JSON data from APIs.
+
+namespace RandomUser
+{
+    // Class for "name" (nested object)
+    // Defines a class to represent a person's name, matching the JSON structure from the API
+    public class Name
+    {
+        [JsonProperty("title")]  // Maps JSON "title" field to Title property 
+        public string Title { get; set; }
+
+        [JsonProperty("first")]  // Maps JSON "first" field to First property 
+        public string First { get; set; }
+
+        [JsonProperty("last")]  // Maps JSON "last" field to Last property 
+        public string Last { get; set; }
+    }
+
+    // Represents street details (Part of the Location class)
+    public class Street
+    {
+        [JsonProperty("number")]  // Street number 
+        public int Number { get; set; }
+
+        [JsonProperty("name")]  // Street name 
+        public string Name { get; set; }
+    }
+
+    // Represents geographic coordinates (latitude & longitude)
+    public class Coordinates
+    {
+        [JsonProperty("latitude")]  // Latitude value
+        public string Latitude { get; set; }
+
+        [JsonProperty("longitude")]  // Longitude value
+        public string Longitude { get; set; }
+    }
+
+    // Represents timezone details (Offset and Description)
+    public class Timezone
+    {
+        [JsonProperty("offset")]  // Timezone offset 
+        public string Offset { get; set; }
+
+        [JsonProperty("description")]  // Timezone description 
+        public string Description { get; set; }
+    }
+
+    // Represents the full location details of a user
+    public class Location
+    {
+        [JsonProperty("street")]  // Nested object: Street details
+        public Street Street { get; set; }
+
+        [JsonProperty("city")]  // City name
+        public string City { get; set; }
+
+        [JsonProperty("state")]  // State or region name
+        public string State { get; set; }
+
+        [JsonProperty("country")]  // Country name
+        public string Country { get; set; }
+
+        [JsonProperty("postcode")]  // Postal/Zip code
+        public string Postcode { get; set; }
+
+        [JsonProperty("coordinates")]  // Nested object: Geographic coordinates
+        public Coordinates Coordinates { get; set; }
+
+        [JsonProperty("timezone")]  // Nested object: Timezone details
+        public Timezone Timezone { get; set; }
+    }
+
+    // Represents user authentication details
+    public class Login
+    {
+        [JsonProperty("uuid")]  // Unique user ID
+        public string Uuid { get; set; }
+
+        [JsonProperty("username")]  // User's chosen username
+        public string Username { get; set; }
+
+        [JsonProperty("password")]  // Encrypted password
+        public string Password { get; set; }
+
+        [JsonProperty("salt")]  // Additional security salt for hashing
+        public string Salt { get; set; }
+
+        [JsonProperty("md5")]  // MD5 hashed password
+        public string Md5 { get; set; }
+
+        [JsonProperty("sha1")]  // SHA1 hashed password
+        public string Sha1 { get; set; }
+
+        [JsonProperty("sha256")]  // SHA256 hashed password
+        public string Sha256 { get; set; }
+    }
+
+    // Represents user's date of birth information
+    public class Dob
+    {
+        [JsonProperty("date")]  // Date of birth 
+        public DateTime Date { get; set; }
+
+        [JsonProperty("age")]  // Age in years
+        public int Age { get; set; }
+    }
+
+    // Represents user registration details 
+    public class Registered
+    {
+        [JsonProperty("date")]  // Date of registration
+        public DateTime Date { get; set; }
+
+        [JsonProperty("age")]  // Years since registration
+        public int Age { get; set; }
+    }
+
+    // Represents user identification details (SSN, passport number)
+    public class Id
+    {
+        [JsonProperty("name")]  // ID type 
+        public string Name { get; set; }
+
+        [JsonProperty("value")]  // ID value 
+        public string Value { get; set; }
+    }
+
+    // Represents user's profile picture URLs (Different sizes)
+    public class Picture
+    {
+        [JsonProperty("large")]  // URL for large-size profile picture
+        public string Large { get; set; }
+
+        [JsonProperty("medium")]  // URL for medium-size profile picture
+        public string Medium { get; set; }
+
+        [JsonProperty("thumbnail")]  // URL for thumbnail-size profile picture
+        public string Thumbnail { get; set; }
+    }
+
+    // Represents the complete user profile (combines all classes)
+    public class User
+    {
+        [JsonProperty("gender")]  // User's gender 
+        public string Gender { get; set; }
+
+        [JsonProperty("name")]  // Nested object: User's name details
+        public Name Name { get; set; }
+
+        [JsonProperty("location")]  // Nested object: User's location details
+        public Location Location { get; set; }
+
+        [JsonProperty("email")]  // User's email address
+        public string Email { get; set; }
+
+        [JsonProperty("login")]  // Nested object: User's login details
+        public Login Login { get; set; }
+
+        [JsonProperty("dob")]  // Nested object: Date of birth details
+        public Dob Dob { get; set; }
+
+        [JsonProperty("registered")]  // Nested object: Registration details
+        public Registered Registered { get; set; }
+
+        [JsonProperty("phone")]  // User's landline phone number
+        public string Phone { get; set; }
+
+        [JsonProperty("cell")]  // User's mobile phone number
+        public string Cell { get; set; }
+
+        [JsonProperty("id")]  // Nested object: Identification details
+        public Id Id { get; set; }
+
+        [JsonProperty("picture")]  // Nested object: Profile picture URLs
+        public Picture Picture { get; set; }
+
+        [JsonProperty("nat")]  // User's nationality 
+        public string Nat { get; set; }
+    }
+
+    // Represents the entire API response containing multiple users
+    public class ApiResponse
+    {
+        [JsonProperty("results")]  // A list of users retrieved from the API
+        public List<User> Results { get; set; }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            // Generate a timestamp for logging purposes (Format: YYYYMMDDHHMMSS)
+            string currentdatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            // Define the directory where log files will be stored
+            string LogFolder = @"C:\Users\philm\OneDrive\Documents\XYZ\API C# Try Catch";
+
+            try
+            {
+                // Ensures the application expects a 100-continue response before sending large data, optimizing HTTP requests.
+                ServicePointManager.Expect100Continue = true;
+
+                // Configures the application to use TLS 1.2 for secure communication with external services.
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+
+                // Declare a string to store the JSON response from the API
+                string json = "";
+
+                // Use the WebClient class to make an HTTP GET request to the API
+                using (WebClient wc = new WebClient())
+                {
+                    // Download the JSON string from the API, requesting 100 random users
+                    json = wc.DownloadString("https://randomuser.me/api/?results=100");
+                }
+
+                // Deserialize the raw JSON string into an ApiResponse object
+                ApiResponse root = JsonConvert.DeserializeObject<ApiResponse>(json);
+
+                // Define the database connection string to connect to SQL Server
+                string connectionString = @"Data Source=Philip; Initial Catalog=RandomUserDB; Integrated Security=True;";
+
+                // Loop through each user in the deserialized results (from the API)
+                foreach (User user in root.Results)
+                {
+                    // Establish a new SQL connection using the connection string
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        // Open the connection to the SQL Server database
+                        connection.Open();
+
+                        // Create the insert statement (using parameterized query to avoid SQL injection)
+                        string insertStatement = @"INSERT INTO RandomUsers 
+                    (Gender, FirstName, LastName, Email, Username, Phone, Cell, StreetNumber, StreetName, City, 
+                     State, Country, Postcode, Latitude, Longitude, TimezoneOffset, TimezoneDescription, 
+                     PictureLarge, Nationality)
+                    VALUES 
+                    (@Gender, @FirstName, @LastName, @Email, @Username, @Phone, @Cell, @StreetNumber, 
+                     @StreetName, @City, @State, @Country, @Postcode, @Latitude, @Longitude, @TimezoneOffset, 
+                     @TimezoneDescription, @PictureLarge, @Nationality)";
+
+                        // Create the SqlCommand object with the insert statement and the SqlConnection object
+                        SqlCommand command = new SqlCommand(insertStatement, connection);
+
+                        // Add parameters to the SqlCommand to prevent SQL injection
+                        command.Parameters.AddWithValue("@Gender", user.Gender);
+                        command.Parameters.AddWithValue("@FirstName", user.Name.First);
+                        command.Parameters.AddWithValue("@LastName", user.Name.Last);
+                        command.Parameters.AddWithValue("@Email", user.Email);
+                        command.Parameters.AddWithValue("@Username", user.Login.Username);
+                        command.Parameters.AddWithValue("@Phone", user.Phone);
+                        command.Parameters.AddWithValue("@Cell", user.Cell);
+                        command.Parameters.AddWithValue("@StreetNumber", user.Location.Street.Number);
+                        command.Parameters.AddWithValue("@StreetName", user.Location.Street.Name);
+                        command.Parameters.AddWithValue("@City", user.Location.City);
+                        command.Parameters.AddWithValue("@State", user.Location.State);
+                        command.Parameters.AddWithValue("@Country", user.Location.Country);
+                        command.Parameters.AddWithValue("@Postcode", user.Location.Postcode);
+                        command.Parameters.AddWithValue("@Latitude", user.Location.Coordinates.Latitude);
+                        command.Parameters.AddWithValue("@Longitude", user.Location.Coordinates.Longitude);
+                        command.Parameters.AddWithValue("@TimezoneOffset", user.Location.Timezone.Offset);
+                        command.Parameters.AddWithValue("@TimezoneDescription", user.Location.Timezone.Description);
+                        command.Parameters.AddWithValue("@PictureLarge", user.Picture.Large);
+                        command.Parameters.AddWithValue("@Nationality", user.Nat);
+
+                        // Execute the insert statement
+                        int rowsAffected = command.ExecuteNonQuery();
+                        Console.WriteLine($"Rows affected: {rowsAffected}");
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                // Log the exception details into a log file
+                using (StreamWriter sw = File.CreateText(LogFolder + "\\" + "ErrorLog_" + currentdatetime + ".log"))
+                {
+                    // Write the full exception details (including stack trace) to the log file
+                    sw.WriteLine(exception.ToString());
+                }
+            }
+        }
+    }
+}
+
