@@ -29,6 +29,7 @@ The key data fields in the RandomUser API response include:
 
 This project uses these fields to populate a table in SQL Server with user data retrieved from the API.
 
+
 **Code Overview**
 
 The project code is designed to process the JSON response from the RandomUser API and insert the relevant data into a SQL Server database. There are two primary execution paths for running the code:
@@ -61,6 +62,7 @@ The SSIS version follows a similar structure but is embedded within a Script Tas
 
 ***Run SSIS Package:*** The SSIS package fetches the data from the RandomUser API, processes it, and loads it into SQL Server.
 
+
 **Loading Data into SQL Server**
 
 After processing the JSON data, the next step is to load it into SQL Server. This project includes an SQL schema that defines the structure of the RandomUsers table.
@@ -81,6 +83,7 @@ The schema to create the RandomUsers table is provided below. This table will st
 
 5. After the table is created, you can use SQL queries to verify the structure:
 
+
 **Running the Code in C#**
 
 To run the project in C#:
@@ -91,6 +94,7 @@ To run the project in C#:
 
 3. Run the application. It will fetch data from the RandomUser API, process it, and insert it into the SQL Server RandomUsers table.
 
+
 **Steps to Execute in C#:**
 
 The code will use HttpClient to send a GET request to the RandomUser API.
@@ -100,6 +104,7 @@ The response is deserialized using JsonConvert.DeserializeObject<T>.
 A connection is made to SQL Server using SqlConnection.
 
 The data is inserted into the database using SQL INSERT statements.
+
 
 **Running the Code in SSIS**
 
@@ -126,6 +131,7 @@ Paste the C# code into the editor, modifying it if necessary to match your SSIS 
 ***3.Run the SSIS Package:***
 
 Execute the SSIS package. The Script Task will fetch the data from the RandomUser API, process it, and load it into the RandomUsers table in SQL Server.
+
 
 **Conclusion**
 
